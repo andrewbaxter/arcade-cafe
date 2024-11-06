@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Indie Game Arcade/Cafe Project</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <img src="cafe_interior.png" alt="カフェインテリアのスケッチ" />
+    <h1>Indie Game Arcade/Cafe Project</h1>
+    <div class="linkbar">
+      <a href="#intro">Overview</a>
+      <a href="#state">Current state</a>
+      <a href="#system">How it works</a>
+      <a href="#benefits">Benefits for developers</a>
+      <a href="#games">What sorts of games?</a>
+      <a href="#adapting">Preparing a game</a>
+      <a href="index.html">日本語</a>
+    </div>
+    <a id="intro"></a>
+    <h2>Overview</h2>
+    <p>
+      This is a project to create a space for people to play, talk about, and
+      watch others play indie games over coffee and food. Unlike traditional
+      arcades which are today loud, unaccommodating, and cater to old or
+      hardcore gamers, this will be a relaxing space that anyone with an
+      interest in games can enjoy.
+    </p>
+    <p>Periodically there will be tournaments and other game-related events.</p>
+    <a id="state"></a>
+    <h2>Current state</h2>
+    <p>
+      The arcade cafe is currently in the planning stages, with a tentative
+      opening expected in early 2025.
+    </p>
+    <p>At the current time the name of the arcade has not yet been decided.</p>
+    <a id="system"></a>
+    <h2>How it works</h2>
+    <ol>
+      <li>A customer enters the store</li>
+      <li>
+        They order at the counter. Each menu item includes 1 or more "play
+        tokens". They get an NFC card charged with their tokens to use while in
+        the store.
+      </li>
+      <li>
+        While the customer waits for their order they can start playing games or
+        watch others (or demo videos) on the big screen.
+      </li>
+      <li>
+        If the customer gets tired of playing games, they can order a drink and
+        take a break to watch others.
+      </li>
+      <li>
+        The customer can purchase additional tokens or get additional tokens
+        when ordering drinks or food.
+      </li>
+    </ol>
+    <p>
+      The store staff will help players play games, find other players for
+      multiplayer games,
+    </p>
+    <a id="benefits"></a>
+    <h2>Benefits for developers</h2>
+    <p>
+      For indie developers, there are a lot of benefits to having a game in the
+      arcade. In no particular order:
+    </p>
+    <ul>
+      <li>
+        It's an additional source of revenue - aside from a small amount of work
+        adapting the game there's no costs.
+      </li>
+      <li>
+        It provides exposure from other players playing the game in the arcade.
+      </li>
+      <li>
+        If someone discovers the game at the arcade, they may enjoy it enough to
+        purchase it themselves.
+      </li>
+      <li>
+        Multiplayer games have limited lifespans due to needing an active player
+        pool. But at the arcade there's an always-available pool of players
+        (other customers).
+      </li>
+      <li>
+        Home gaming tends to favor long-form games with tens of hours of
+        content, but a game with only 5 or 10 minutes of content is viable in an
+        arcade setting.
+      </li>
+      <li>
+        The arcade provides a way to do limited early or demo releases and
+        gather feedback.
+      </li>
+      <li>
+        The arcade is a great location to hold release events, tournaments, and
+        other promotional activities.
+      </li>
+    </ul>
+    <a id="games"></a>
+    <h2>What sorts of games?</h2>
+    <p>
+      The arcade/cafe format is best suited to games that are easy to pick up
+      and where an average play lasts around 5 minutes. The games can be single-
+      or 2-player, or possibly allow local multiplayer within the arcade. The
+      game should not have music, to keep cafe noise levels reasonable.
+    </p>
+    <p>For example:</p>
+    <ul>
+      <li>Traditional arcade games</li>
+      <li>Racing games</li>
+      <li>Sports games</li>
+      <li>Boss rush games</li>
+      <li>Co-operative puzzle games</li>
+      <li>Game-jam games or experimental games</li>
+      <li>Game demos - a self-contained segment of a larger game</li>
+      <li>Short narrative games</li>
+    </ul>
+    <p>
+      A longer game that has many stages could be modified so that a single play
+      is a single level, with a level-select screen.
+    </p>
+    <a id="adapting"></a>
+    <h2>Preparing a game</h2>
+    <p>
+      Basically, games must not have an intro/main menu/settings/tutorial/pause
+      screen (at most a player select screen) and must accept tokens.
+    </p>
+    <p>There are two approaches to adapting a game:</p>
+    <ul>
+      <li>
+        <p>
+          The arcade handles payment and player select - this is the easiest
+          option.
+        </p>
+        <p>
+          The game can define the minimum and maximum number of players, and the
+          arcade software will handle player selection and token payments. Once
+          players and payments are selected, the game will be launched. The game
+          can move immediately to gameplay.
+        </p>
+      </li>
+      <li>
+        <p>
+          The game handles payment and player select - this is the most flexible
+          option.
+        </p>
+        <p>
+          The arcade has a simple HTTP API for requesting and accepting play
+          tokens. When a player selects the game, the game will be immediately
+          launched. The game is responsible for allowing players to join and
+          receive tokens via the HTTP API.
+        </p>
+        <p>
+          This is the most flexible option, allowing a custom player-select
+          screen and advanced payment mechanics, like paying to revive after
+          failure or for in-game boosts.
+        </p>
+      </li>
+    </ul>
+  </body>
+</html>

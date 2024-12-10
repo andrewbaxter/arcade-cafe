@@ -54,7 +54,9 @@ img {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.3cm;
+  align-items: baseline;
+  column-gap: 0.9cm;
+  row-gap: 0.3cm;
 
   & > a {
     text-decoration: none;
@@ -62,4 +64,14 @@ img {
       text-decoration: underline;
     }
   }
+}
+
+.linkbar_spacer {
+  flex-grow: 1;
+}
+
+.contact {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5cm;
 }

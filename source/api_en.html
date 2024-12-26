@@ -19,7 +19,7 @@
     </p>
     <ul>
       <li>
-        <p>This is a HTTP (no S) API to <code>http://127.0.0.1:42243</code></p>
+        <p>This is an HTTP (no S) API to <code>http://127.0.0.1:42243</code></p>
       </li>
       <li>
         <p>
@@ -37,15 +37,33 @@
       <li>
         <p>
           Responses may have additional properties for features in testing.
-          Please ignore them until they are documented
+          Please ignore them until they are documented.
         </p>
       </li>
     </ul>
+    <h2>Coin acceptance API</h2>
     <p>Coins/tokens are also referred to as payments here.</p>
+    <p>
+      There are no actual coins/tokens - everything is done via NFC cards, but
+      anyway this API serves the general purpose of "accepting coins".
+    </p>
     <pre class="mermaid">
+---
+title: Singleplayer
+---
+flowchart TD
+    ask_payment -->|Got payment| commit_payment[Send commit_payment]
+    ask_payment --> wait_payment[Waiting for payment]
+    wait_payment -->|Sleep 0.1s| ask_payment
+    commit_payment --> start_game{Start game}
+    </pre>
+    <pre class="mermaid">
+---
+title: Multiplayer
+---
 flowchart TD
     player_select{No players} -->|Press start| ask_payment[Send ask_payment]
-    ask_payment -->|Got token| countdown
+    ask_payment -->|Got payment| countdown
     ask_payment --> wait_payment[Waiting for payment]
     wait_payment -->|Sleep 0.1s| ask_payment
     wait_payment -->|Press start| player_select
@@ -55,7 +73,7 @@ flowchart TD
     commit_payment --> start_game{Start game}
 </pre
     >
-    <h2><code>{"v1": { "ask_payment": { ... } } }</code></h2>
+    <h3><code>{"v1": { "ask_payment": { ... } } }</code></h3>
     <p>This does several things:</p>
     <ol>
       <li>
@@ -81,20 +99,19 @@ flowchart TD
     <p>
       If this method isn't called for a few seconds it stops accepting tokens.
     </p>
-    <h3>Request structure</h3>
+    <h4>Request structure</h4>
     <pre class="code">
 { "v1": { "ask_payment": {
-    "game_id": "my_game",
-    "client_payment_id": "payment123", 
+    "client_payment_id": {
+      "game_id": "my_game",
+      "id": "payment123"
+    }
 } } }</pre
     >
     <p>
-      <code>game_id</code> is the ID for your game which we'll decide when
-      preparing the game.
-    </p>
-    <p>
       <code>client_payment_id</code> is a unique ID for the payment (an
-      idempotency token). Basically, after a payment is made for a
+      idempotency token) composed of your game ID and a unique portion you
+      generate as you see fit. Basically, after a payment is made for a
       <code>client_payment_id</code>, all requests for that
       <code>client_payment_id</code> will return the same data and no further
       tokens will be accepted. Use different <code>client_payment_ids</code> to
@@ -102,43 +119,53 @@ flowchart TD
       timestamp if you don't need this functionality.
     </p>
     <p>
+      A committed payment will be recorded to the game in the
+      <code>client_payment_id</code>.
+    </p>
+    <p>
       Only one token can be requested at a time (there's only one reader).
       Making requests with a different <code>client_payment_id</code>s before a
       token is accepted will replace the previous request.
     </p>
-    <h3>Success response, no token</h3>
+    <h4>Success response, no token</h4>
     <pre class="code">
 { "ok": {
     "payment": null
 } }
     </pre>
-    <h3>Success response, token reserved</h3>
+    <h4>Success response, token reserved</h4>
     <pre class="code">
 { "ok": {
     "payment": {
-        "client_payment_id": 1234,
+        "client_payment_id": {
+          "game_id": "my_game",
+          "id": "payment123"
+        }
     }
 } }
     </pre>
     <p><code>id</code> is the reservation ID, used by other calls.</p>
-    <h2><code>{"v1": { "release_payment": { ... } } }</code></h2>
+    <h3><code>{"v1": { "release_payment": { ... } } }</code></h3>
     <p>
       This releases a payment reservation. For instance, if a player that tapped
       in used the wrong card, or they decide they don't want to play before the
       game starts. This functionality is optional but may make for a better
       player experience.
     </p>
-    <h3>Request structure</h3>
+    <h4>Request structure</h4>
     <pre class="code">
 { "v1": { "release_payment": {
-    "client_payment_id": "payment123", 
+    "client_payment_id": {
+      "game_id": "my_game",
+      "id": "payment123"
+    }
 } } }</pre
     >
-    <h3>Success response</h3>
+    <h4>Success response</h4>
     <pre class="code">
 { "ok": null }
     </pre>
-    <h2><code>{"v1": { "commit_clear_payments": { ... } } }</code></h2>
+    <h3><code>{"v1": { "commit_clear_payments": { ... } } }</code></h3>
     <p>
       When player selection is complete and no further changes can be made, call
       this to record the payment to the game. If any token reservations were
@@ -146,13 +173,18 @@ flowchart TD
       to clear all reservations by sending the request with no "commit"
       reservations listed.
     </p>
-    <h3>Request structure</h3>
+    <h4>Request structure</h4>
     <pre class="code">
 { "v1": { "commit_clear_payments": {
-    "commit_payment_ids": [ "payment123" ], 
+    "commit_payment_ids": [
+        {
+          "game_id": "my_game",
+          "id": "payment123"
+        }
+    ]
 } } }</pre
     >
-    <h3>Success response</h3>
+    <h4>Success response</h4>
     <pre class="code">
 { "ok": null }
     </pre>

@@ -38,11 +38,28 @@
         </p>
       </li>
     </ul>
+    <h2>コイン受けAPI</h2>
     <p>コイン＝トークン＝支払い＝payment</p>
+    <p>
+      支払いは全部NFCカードで実物のコインやトークンはないですけどそのような目的のAPIです。
+    </p>
     <pre class="mermaid">
+---
+title: シングルプレイ
+---
+flowchart TD
+    ask_payment -->|支払いを受けた| commit_payment[commit_paymentを送る]
+    ask_payment --> wait_payment[支払い待ち]
+    wait_payment -->|0.1s経った| ask_payment
+    commit_payment --> start_game{ゲームスタート}
+    </pre>
+    <pre class="mermaid">
+---
+title: マルチプレイ
+---
 flowchart TD
     player_select{プレヤー数０} -->|スタートを押して| ask_payment[ask_paymentを送る]
-    ask_payment -->|トークンを受けた| countdown
+    ask_payment -->|支払いを受けた| countdown
     ask_payment --> wait_payment[支払い待ち]
     wait_payment -->|0.1s経った| ask_payment
     wait_payment -->|スタートを押して| player_select
@@ -52,7 +69,7 @@ flowchart TD
     commit_payment --> start_game{ゲームスタート}
 </pre
     >
-    <h2><code>{"v1": { "ask_payment": { ... } } }</code></h2>
+    <h3><code>{"v1": { "ask_payment": { ... } } }</code></h3>
     <p>支払いが始まる多目的リクエストです。</p>
     <ol>
       <li>
@@ -77,62 +94,74 @@ flowchart TD
     <p>
       トークン入らなくなった時リクエスト送ることをやめるとリーダーが再シャットダウンします。
     </p>
-    <h3>リクエスト</h3>
+    <h4>リクエスト</h4>
     <pre class="code">
 { "v1": { "ask_payment": {
-    "game_id": "my_game",
-    "client_payment_id": "payment123", 
+    "client_payment_id": {
+      "game_id": "my_game",
+      "id": "payment123"
+    }
 } } }</pre
     >
-    <p><code>game_id</code>は協力して決めるゲームのIDです。</p>
     <p>
       <code>client_payment_id</code
       >はトークンに関連付けます。支払いしてから同じ<code>client_payment_id</code>でリクエストを送ったら二度と支払いされないです（idempotency
-      key）。次の支払いに新しい<code>client_payment_id</code>を使います。UUIDでもタイムスタンプでもOKです。
+      key）。２つの部分あります：うちと協力するとき決めるゲームのIDとゲームがスキに作るユニークなストリング。UUIDでもタイムスタンプでもOKです。次の支払いに新しい<code>client_payment_id</code>を使います。
     </p>
     <p>
       同時に複数にトークを受けられないです。トークンを受ける前に違う<code>client_payment_id</code>を遅れば前の<code>client_payment_id</code>は受け換えられます。
     </p>
-    <h3>成功のリスポンス、トークンを受けませんでした</h3>
+    <h4>成功のリスポンス、トークンを受けませんでした</h4>
     <pre class="code">
 { "ok": {
     "payment": null
 } }
     </pre>
-    <h3>成功のリスポンス、トークンを受けました</h3>
+    <h4>成功のリスポンス、トークンを受けました</h4>
     <pre class="code">
 { "ok": {
     "payment": {
-        "client_payment_id": "payment123",
+        "client_payment_id": {
+          "game_id": "my_game",
+          "id": "payment123"
+        }
     }
 } }
     </pre>
     <p><code>client_payment_id</code>はリクエストに送ったのと同じです.</p>
-    <h2><code>{"v1": { "release_payment": { ... } } }</code></h2>
+    <h3><code>{"v1": { "release_payment": { ... } } }</code></h3>
     <p>
       以前に予約されたトークンを開放します。例えば、ゲームスタート前にプレヤー一人が徹底したい場合。これは任意ですけどプレヤーができればより良いプレヤー体験になるかもしれません。
     </p>
-    <h3>リクエスト</h3>
+    <h4>リクエスト</h4>
     <pre class="code">
 { "v1": { "release_payment": {
-    "client_payment_id": "payment123", 
+    "client_payment_id": {
+      "game_id": "my_game",
+      "id": "payment123"
+    }
 } } }</pre
     >
-    <h3>成功のリスポンス</h3>
+    <h4>成功のリスポンス</h4>
     <pre class="code">
 { "ok": null }
     </pre>
-    <h2><code>{"v1": { "commit_clear_payments": { ... } } }</code></h2>
+    <h3><code>{"v1": { "commit_clear_payments": { ... } } }</code></h3>
     <p>
       プレヤーセレクトが終わったら予約した支払いをしたためます。IDが失われた支払いは削除されます。
     </p>
-    <h3>リクエスト</h3>
+    <h4>リクエスト</h4>
     <pre class="code">
 { "v1": { "commit_clear_payments": {
-    "commit_payment_ids": [ "payment123" ], 
+    "commit_payment_ids": [
+        {
+          "game_id": "my_game",
+          "id": "payment123"
+        }
+    ]
 } } }</pre
     >
-    <h3>成功のリスポンス</h3>
+    <h4>成功のリスポンス</h4>
     <pre class="code">
 { "ok": null }
     </pre>
